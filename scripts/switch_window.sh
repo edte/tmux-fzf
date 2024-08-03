@@ -12,26 +12,22 @@ current_window_origin=$(tmux display-message -p '#S:#I: #{window_name}')
 current_window=$(tmux display-message -p '#S:#I:')
 
 
-if [[ -z  "$TMUX_FZF_WINDOW_FILTER" ]]; then
-  window_filter="-a"
-else
-  window_filter="-f \"$TMUX_FZF_WINDOW_FILTER\""
-fi
+windows=$(tmux list-windows -a -F "#S:#{window_index}: #{window_name}" | grep -v "^$current_window" )
 
-if [[ -z "$TMUX_FZF_WINDOW_FORMAT" ]]; then
-    windows=$(tmux list-windows $window_filter)
-else
-    windows=$(tmux list-windows $window_filter -F "#S:#{window_index}: $TMUX_FZF_WINDOW_FORMAT")
-fi
 
-FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --header='Select target window.'"
-if [[ -z "$TMUX_FZF_SWITCH_CURRENT" ]]; then
-    windows=$(echo "$windows" | grep -v "^$current_window")
-fi
-target_origin=$(printf "%s\n[cancel]" "$windows" | eval "$TMUX_FZF_BIN $TMUX_FZF_OPTIONS $TMUX_FZF_PREVIEW_OPTIONS")
-[[ "$target_origin" == "[cancel]" || -z "$target_origin" ]] && exit
-target=$(echo "$target_origin" | sed 's/: .*//')
+# $TMUX_FZF_BIN 是 fzf 可执行文件的路径，$TMUX_FZF_OPTIONS 和 $TMUX_FZF_PREVIEW_OPTIONS 是传递给 fzf 的选项。
+# fzf 是一个命令行模糊查找器，用于在列表中选择一个项目。最后，用户选择的项目（窗口）存储在 target_origin 变量中。
+select_window=$(printf  "$windows" | eval "$TMUX_FZF_BIN $TMUX_FZF_OPTIONS $TMUX_FZF_PREVIEW_OPTIONS")
+[[  -z "$select_window" ]] && exit
+
+# 这行代码使用 sed 命令删除 target_origin 中的 : 之后的所有内容，只保留窗口的索引或名称。处理后的结果存储在 target 变量中。
+target=$(echo "$select_window" | sed 's/: .*//')
+
+# 这行代码首先使用 sed 命令删除 target 中的 : 之后的所有内容（如果存在）。
+# 然后，它使用 xargs 命令将处理后的 target 传递给 tmux switch-client -t 命令，从而切换到目标窗口所在的会话。
 echo "$target" | sed 's/:.*//g' | xargs -I{} tmux switch-client -t {}
+
+# 这行代码使用 xargs 命令将 target 变量传递给 tmux select-window -t 命令，从而激活并切换到目标窗口。
 echo "$target" | xargs -I{} tmux select-window -t {}
 
 
