@@ -14,3 +14,6 @@ by tpm plugin
 ```
 set -g @plugin 'edte/tmux-fzf'
 ```
+
+# refs
+https://github.com/sainnhe/tmux-fzf
