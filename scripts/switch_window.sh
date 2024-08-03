@@ -14,10 +14,9 @@ current_window=$(tmux display-message -p '#S:#I:')
 
 windows=$(tmux list-windows -a -F "#S:#{window_index}: #{window_name}" | grep -v "^$current_window" )
 
-
 # $TMUX_FZF_BIN 是 fzf 可执行文件的路径，$TMUX_FZF_OPTIONS 和 $TMUX_FZF_PREVIEW_OPTIONS 是传递给 fzf 的选项。
 # fzf 是一个命令行模糊查找器，用于在列表中选择一个项目。最后，用户选择的项目（窗口）存储在 target_origin 变量中。
-select_window=$(printf  "$windows" | eval "$TMUX_FZF_BIN $TMUX_FZF_OPTIONS $TMUX_FZF_PREVIEW_OPTIONS")
+select_window=$(printf  "$windows" | eval "$TMUX_FZF_BIN -p -w 90% -h 90% -m --preview='/Users/edte/go/src/test/tmux-fzf/scripts/.preview {}' --preview-window=:follow")
 [[  -z "$select_window" ]] && exit
 
 # 这行代码使用 sed 命令删除 target_origin 中的 : 之后的所有内容，只保留窗口的索引或名称。处理后的结果存储在 target 变量中。
