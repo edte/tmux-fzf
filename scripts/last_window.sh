@@ -6,7 +6,7 @@ current_session=$(tmux display-message -p '#{session_name}')
 current_window=$(tmux display-message -p '#{window_index}')
 current_window_name=$(tmux display-message -p '#{window_name}')
 
-tmp_file="/tmp/tmux_previous"
+tmp_file="~/.local/state/nvim/tmux.last"
 
 if [ -f "$tmp_file" ]; then
     IFS=$'\n' read -d '' -r -a previous_values <"$tmp_file"

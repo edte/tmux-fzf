@@ -6,7 +6,6 @@ current_session=$(tmux display-message -p '#{session_name}')
 current_window_index=$(tmux display-message -p '#{window_index}')
 current_window_name=$(tmux display-message -p '#{window_name}')
 
-
 TMUX_FZF_BIN="$(which fzf-tmux)"
 
 current_window=$(tmux display-message -p '#S:#I:')
@@ -17,7 +16,7 @@ windows=$(tmux list-windows -a -F "#S:#{window_index}: #{window_name}" | grep -v
 # fzf 是一个命令行模糊查找器，用于在列表中选择一个项目。最后，用户选择的项目（窗口）存储在 target_origin 变量中。
 select_window=$(printf "$windows" | eval "$TMUX_FZF_BIN -p -w 90% -h 90% -m --preview='{}' --preview-window=:follow")
 
-echo "$TMUX_FZF_BIN -p -w 90% -h 90% -m --preview=' {}' --preview-window=:follow"
+# echo "$TMUX_FZF_BIN -p -w 90% -h 90% -m --preview=' {}' --preview-window=:follow"
 
 [[ -z "$select_window" ]] && exit
 
@@ -40,6 +39,6 @@ fi
 
 # echo "current": $current_session:$current_window:$current_window_name
 
-tmp_file="/tmp/tmux_previous"
+tmp_file="~/.local/state/nvim/tmux.last"
 
 echo -e "$current_session\n$current_window_index" >"$tmp_file"
