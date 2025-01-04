@@ -39,6 +39,6 @@ fi
 
 # echo "current": $current_session:$current_window:$current_window_name
 
-tmp_file="~/.local/state/nvim/tmux.last"
+tmp_file="/tmp/tmux_previous"
 
 echo -e "$current_session\n$current_window_index" >"$tmp_file"
