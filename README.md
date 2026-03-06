@@ -6,6 +6,7 @@ A small tmux plugin for switching windows across sessions with `fzf-tmux`.
 
 - `Ctrl-l`: open a window picker across all tmux sessions
 - `Ctrl-h`: jump back to the previous window
+- Sort windows by frecency-like history
 - Preview the current active pane on the right side
 - Keep ANSI colors in preview output
 - Use exact search instead of fuzzy search
@@ -63,6 +64,22 @@ Examples:
 - `manage` matches `push-manage-console`
 - `mnge` does not match `push-manage-console`
 
+## Sort Behavior
+
+The picker sorts windows before they are passed to `fzf`.
+
+Current sort strategy:
+
+- windows used more recently get a higher score
+- windows used more frequently also get a higher score
+- recent usage has stronger weight than old usage
+- `fzf` is only used for filtering and selection
+
+Usage history is updated after successful jumps from:
+
+- `Ctrl-l`
+- `Ctrl-h`
+
 ## Preview Behavior
 
 The right preview window shows the current visible content of the target window's active pane.
@@ -80,12 +97,14 @@ Current behavior:
 ```mermaid
 flowchart LR
     A[Ctrl-l] --> B[list all tmux windows]
-    B --> C[fzf-tmux picker]
-    C --> D[right preview]
-    D --> E[capture active pane]
-    C --> F[select target window]
-    F --> G[switch client to target session]
-    G --> H[select target window]
+    B --> C[sort by frecency score]
+    C --> D[fzf-tmux picker]
+    D --> E[right preview]
+    E --> F[capture active pane]
+    D --> G[select target window]
+    G --> H[switch client to target session]
+    H --> I[select target window]
+    I --> J[update usage history]
 ```
 
 ## Files
@@ -94,10 +113,14 @@ flowchart LR
 - `scripts/switch_window.sh`: open picker and switch window
 - `scripts/preview_pane.sh`: render preview content
 - `scripts/last_window.sh`: jump back to previous window
+- `scripts/sort_windows.sh`: sort windows before `fzf`
+- `scripts/update_history.sh`: record window usage history
 
 ## Notes
 
 - The previous window state is stored in `/tmp/tmux_previous`
+- Usage history is stored in `~/.local/state/tmux-fzf/window_events.tsv`
+- Usage summary is stored in `~/.local/state/tmux-fzf/window_stats.tsv`
 - Preview quality depends on how tmux captures pane content from terminal apps
 
 ## Reference

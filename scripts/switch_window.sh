@@ -13,6 +13,8 @@ TMUX_FZF_BIN="$(which fzf-tmux)"
 current_window=$(tmux display-message -p '#S:#I:')
 
 PREVIEW_SCRIPT="$CURRENT_DIR/preview_pane.sh"
+SORT_SCRIPT="$CURRENT_DIR/sort_windows.sh"
+UPDATE_HISTORY_SCRIPT="$CURRENT_DIR/update_history.sh"
 
 windows=$(tmux list-windows -a -F "#S:#{window_index}: #{window_name}" | grep -v "^$current_window")
 
@@ -20,6 +22,7 @@ windows=$(tmux list-windows -a -F "#S:#{window_index}: #{window_name}" | grep -v
 # fzf 是一个命令行模糊查找器，用于在列表中选择一个项目。最后，用户选择的项目（窗口）存储在 target_origin 变量中。
 select_window=$(
     printf "%s\n" "$windows" |
+        bash "$SORT_SCRIPT" |
         "$TMUX_FZF_BIN" -p -w 90% -h 90% -m --ansi --exact \
             --color "preview-bg:#222436,gutter:#222436,preview-border:#565f89,separator:#565f89,scrollbar:#7aa2f7,hl:#FF4500,hl+:#FF4500" \
             --preview "bash $PREVIEW_SCRIPT {}" \
@@ -46,6 +49,8 @@ new_window=$(tmux display-message -p '#{window_index}')
 if [ "$current_session" = "$new_session" ] && [ "$current_window_index" = "$new_window" ]; then
     return
 fi
+
+bash "$UPDATE_HISTORY_SCRIPT" "$target"
 
 # echo "current": $current_session:$current_window:$current_window_name
 

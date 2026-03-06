@@ -2,6 +2,9 @@
 
 # tmux 跳转到前一个window，不区分session
 
+CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+UPDATE_HISTORY_SCRIPT="$CURRENT_DIR/update_history.sh"
+
 current_session=$(tmux display-message -p '#{session_name}')
 current_window=$(tmux display-message -p '#{window_index}')
 current_window_name=$(tmux display-message -p '#{window_name}')
@@ -34,6 +37,8 @@ if [ "$current_session" = "$previous_session" ] && [ "$current_window" = "$previ
 fi
 
 tmux switch-client -t "${previous_session}:${previous_window}"
+
+bash "$UPDATE_HISTORY_SCRIPT" "${previous_session}:${previous_window}"
 
 # echo "current: $current_session:$current_window:$current_window_name"
 
