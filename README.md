@@ -1,5 +1,7 @@
 # tmux-fzf
 
+[中文说明](./README.zh-CN.md)
+
 A small tmux plugin for switching windows across sessions with `fzf-tmux`.
 
 ## Features
@@ -127,3 +129,4 @@ flowchart LR
 
 - https://github.com/sainnhe/tmux-fzf
 - https://github.com/Kristijan/fzf-pane-switch.tmux
+- https://github.com/camdencheek/fre
