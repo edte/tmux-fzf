@@ -23,7 +23,7 @@ windows=$(tmux list-windows -a -F "#S:#{window_index}: #{window_name}" | grep -v
 select_window=$(
     printf "%s\n" "$windows" |
         bash "$SORT_SCRIPT" |
-        "$TMUX_FZF_BIN" -p -w 90% -h 90% -m --ansi --exact \
+        "$TMUX_FZF_BIN" -p -w 90% -h 90% -m --ansi --exact --no-sort \
             --color "preview-bg:#222436,gutter:#222436,preview-border:#565f89,separator:#565f89,scrollbar:#7aa2f7,hl:#FF4500,hl+:#FF4500" \
             --preview "bash $PREVIEW_SCRIPT {}" \
             --preview-window=:follow
