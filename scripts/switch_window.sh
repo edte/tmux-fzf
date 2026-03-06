@@ -2,6 +2,8 @@
 
 # 切换window，不区分session
 
+CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 current_session=$(tmux display-message -p '#{session_name}')
 current_window_index=$(tmux display-message -p '#{window_index}')
 current_window_name=$(tmux display-message -p '#{window_name}')
@@ -10,11 +12,19 @@ TMUX_FZF_BIN="$(which fzf-tmux)"
 
 current_window=$(tmux display-message -p '#S:#I:')
 
+PREVIEW_SCRIPT="$CURRENT_DIR/preview_pane.sh"
+
 windows=$(tmux list-windows -a -F "#S:#{window_index}: #{window_name}" | grep -v "^$current_window")
 
 # $TMUX_FZF_BIN 是 fzf 可执行文件的路径，$TMUX_FZF_OPTIONS 和 $TMUX_FZF_PREVIEW_OPTIONS 是传递给 fzf 的选项。
 # fzf 是一个命令行模糊查找器，用于在列表中选择一个项目。最后，用户选择的项目（窗口）存储在 target_origin 变量中。
-select_window=$(printf "$windows" | eval "$TMUX_FZF_BIN -p -w 90% -h 90% -m --preview='{}' --preview-window=:follow")
+select_window=$(
+    printf "%s\n" "$windows" |
+        "$TMUX_FZF_BIN" -p -w 90% -h 90% -m --ansi --exact \
+            --color "preview-bg:#222436,gutter:#222436,preview-border:#565f89,separator:#565f89,scrollbar:#7aa2f7,hl:#FF4500,hl+:#FF4500" \
+            --preview "bash $PREVIEW_SCRIPT {}" \
+            --preview-window=:follow
+)
 
 # echo "$TMUX_FZF_BIN -p -w 90% -h 90% -m --preview=' {}' --preview-window=:follow"
 
