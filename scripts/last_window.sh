@@ -7,9 +7,25 @@ UPDATE_HISTORY_SCRIPT="$CURRENT_DIR/update_history.sh"
 
 current_session=$(tmux display-message -p '#{session_name}')
 current_window=$(tmux display-message -p '#{window_index}')
-current_window_name=$(tmux display-message -p '#{window_name}')
 
 tmp_file="/tmp/tmux_previous"
+lock_dir="${tmp_file}.lock"
+
+write_state() {
+    local tmp_write_file="${tmp_file}.$$"
+    printf "%s\n%s\n" "$1" "$2" >"$tmp_write_file"
+    mv "$tmp_write_file" "$tmp_file"
+}
+
+cleanup() {
+    rmdir "$lock_dir" 2>/dev/null || true
+}
+
+if ! mkdir "$lock_dir" 2>/dev/null; then
+    exit 0
+fi
+
+trap cleanup EXIT
 
 if [ -f "$tmp_file" ]; then
     IFS=$'\n' read -d '' -r -a previous_values <"$tmp_file"
@@ -21,25 +37,16 @@ else
 fi
 
 if [ -z "$previous_session" ] || [ -z "$previous_window" ]; then
-    echo -e "$current_session\n$current_window" >"$tmp_file"
-    echo "first init"
-    echo "previous: $previous_session:$previous_window"
-    echo "current: $current_session:$current_window"
-    exit
+    write_state "$current_session" "$current_window"
+    exit 0
 fi
 
-# echo $previous_session
-# echo $previous_window
-
 if [ "$current_session" = "$previous_session" ] && [ "$current_window" = "$previous_window" ]; then
-    echo "Current and previous windows are the same. Doing nothing."
-    exit
+    exit 0
 fi
 
 tmux switch-client -t "${previous_session}:${previous_window}"
 
 bash "$UPDATE_HISTORY_SCRIPT" "${previous_session}:${previous_window}"
 
-# echo "current: $current_session:$current_window:$current_window_name"
-
-echo -e "$current_session\n$current_window" >"$tmp_file"
+write_state "$current_session" "$current_window"
